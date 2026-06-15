@@ -1,0 +1,20 @@
+# ====================================================================
+# Physical Constants & Species Parameters
+# ====================================================================
+
+# Universal physical constants
+K_B: 1.380649e-23       # Boltzmann constant [J/K]
+AMU: 1.66053906660e-27  # Atomic mass unit [kg]
+ANGSTROM: 1.0e-10       # Ångström [m]
+
+# Atomic properties (Krypton and Xenon)
+M_KR: 83.798            # Kr atomic mass [amu]
+M_XE: 131.293           # Xe atomic mass [amu]
+EPS_KR_KB: 171.0        # Kr ε/k_B [K]
+EPS_XE_KB: 221.0        # Xe ε/k_B [K]
+SIGMA_KR: 3.636         # Kr σ [Å]
+SIGMA_XE: 3.924         # Xe σ [Å]
+
+# Reference species used to define the scale of reduced units (length, mass, energy)
+# Usually set to 'KR' (Krypton)
+reference_species: "KR"
