@@ -656,6 +656,7 @@ def run_md(config: Dict) -> Dict:
     seed          = config.get('seed', 42)
     traj_file     = config.get('traj_file', None)
     thermo_file   = config.get('thermo_file', None)
+    species_file  = config.get('species_file', None)
     use_torch     = config.get('use_torch', True)
 
     # ---- reduced-unit conversions ----
@@ -782,6 +783,11 @@ def run_md(config: Dict) -> Dict:
         np.savetxt(thermo_file, thermo_data, delimiter=',',
                    header=header, comments='', fmt='%.8e')
         print(f"  Thermo log  → {thermo_file}   {len(thermo_data)} rows")
+
+    if species_file:
+        os.makedirs(os.path.dirname(os.path.abspath(species_file)), exist_ok=True)
+        np.save(species_file, species)
+        print(f"  Species     → {species_file}   shape {species.shape}")
 
     # ---- summary statistics ----
     results: Dict = {

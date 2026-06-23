@@ -1,110 +1,110 @@
-# 双组分 Lennard-Jones 分子动力学模拟项目 (Kr-Xe)
+# Binary Component Lennard-Jones MD Simulation (Kr-Xe)
 
-## 项目介绍
-本项目实现了一个从头编写的**双组分（Kr-Xe）Lennard-Jones 分子动力学 (MD) 模拟引擎**。本项目的物理目标包括对氪（Kr）和氙（Xe）混合气体系统的结构、热力学和动力学性质进行系统分析，构建相图，并最终将该基于经验势的模拟结果与 **M3GNet** 普适神经网络力场（NNFF）的计算结果进行横向比较。
+## 项目简介
+本项目实现了一个双组分（Kr-Xe）Lennard-Jones (LJ) 分子动力学模拟引擎，包含完整的物理法则模拟、热力学与动力学性质计算、大批量网格扫描调度以及相图构建。在此基础上，项目还通过 Atomic Simulation Environment (ASE) 接入了 M3GNet 深度学习势函数，实现了传统经验力场与现代神经网络力场在精度与性能上的比对。
 
 ---
 
 ## 环境配置
-本项目使用 Python 3.10 构建。推荐使用 `uv` 或 `conda` 进行虚拟环境的管理与依赖安装。
 
-### 使用 `uv` 安装（推荐）
+本项目需要 **Python 3.11** 及以上版本。由于依赖深度学习库及高性能计算包，建议使用虚拟环境进行管理。
+
+### 依赖安装 (基于 `uv`)
 ```bash
-# 在项目根目录下创建虚拟环境
-uv venv .venv --python=3.10
+# 创建虚拟环境
+uv venv .venv --python=3.11.7
 # 激活环境
 source .venv/bin/activate
-# 安装所有依赖包
-uv pip install numpy scipy matplotlib torch ase matgl pymatgen
-```
-
-### 使用 `conda` 安装
-```bash
-conda create -n lj_md python=3.10 numpy scipy matplotlib pytorch ase matgl pymatgen -c conda-forge
-conda activate lj_md
+# 安装依赖
+uv pip install numpy scipy pandas matplotlib torch ase matgl pymatgen
 ```
 
 ---
 
-## 任务进度清单
+## 项目结构与功能模块
 
-### ✅ 已完成的 Tasks (Task 1 - 5)
-*   **Task 1: 构建核心 MD 引擎**
-    *   实现了参数设置及 Lorentz-Berthelot 混合规则。
-    *   实现了 FCC 晶格初始化与基于 Maxwell-Boltzmann 分布的速度初始化（带质心动量修正）。
-    *   支持 **PyTorch Autograd**（自动微分）和 **NumPy 向量化** 两种后端进行解析或自动求导受力计算。
-    *   实现了 Velocity-Verlet 积分器（微正则系综 NVE）与可逆的 Nosé-Hoover 温控积分器（正则系综 NVT）。
-    *   设计了外部文件 `config.yaml` 灵活加载物理常数与计算基准。
-*   **Task 2: MD 引擎严谨性验证**
-    *   **NVE 能量守恒测试**：测试了 `dt=1fs` 与 `dt=2fs` 下的能量漂移率（Drift < $10^{-6}$），完全符合物理守恒定律。
-    *   **NVT 温度平衡测试**：验证了体系起始状态能迅速平衡至目标温度（$120\text{ K}$），稳态偏差 < 0.02%。
-*   **Task 3: 双组分生产级模拟运行**
-    *   执行了标准配置（$N=500, x_B=0.5$）下，三种不同相互作用强度修正参数（$\xi = 0.7, 1.0, 1.3$）的高负荷 MD 生产模拟（单次 $50,000$ 步）。
-    *   利用多进程并发执行完成了 $\xi=0.7$ 时的**浓度梯度系列扫描**（$x_B \in [0.1, 0.9]$），产出了 9 组 30,000 步的长期轨迹数据，为相图的构建做好了数据储备。
-*   **Task 4: 偏径向分布函数与短程有序度分析**
-    *   编写了 `src/analysis.py` 数据分析核心，实现了考虑 PBC 的轨迹 Unwrapping 和高速向量化求解结构性质的算法。
-    *   计算并绘制了 Kr-Kr、Xe-Xe 和 Kr-Xe 在三种不同相互作用强度（$\xi$）下的偏径向分布函数 $g(r)$。
-    *   引入并计算了 Warren-Cowley 短程有序度参数 $\alpha_1$，量化验证了相分离、理想混合与有序化效应。
-*   **Task 5: 均方位移与自扩散系数计算**
-    *   实现了针对大体系轨迹多时间起点的均方位移 (MSD) 高效提取方法。
-    *   计算出了三种状态下液态 Kr 与 Xe 的自扩散系数 $D$，并自动输出分析报告汇总结果。
-
-### ⏳ 待完成的 Tasks (Task 6 - 10)
-*   **Task 6**: 热力学分析（混合焓 $\Delta H_{\text{mix}}$、比热容 $C_v$ 及其涨落）。
-*   **Task 7**: 轨迹可视化（导出 Ovito/ASE 支持的动画，观察相分离或有序化相变现象）。
-*   **Task 8**: 相图构建（基于 Task 3 的数据分析 Kr-Xe 的临界相变及固-液/液-液相界）。
-*   **Task 9 - 10**: M3GNet 神经网络力场推理引入与计算对比。
-*   撰写自动生成的 LaTeX / Markdown 结题报告。
-
----
-
-## 当前代码结构、功能与使用方法
-
+### 目录结构
 ```text
 binary-lj-md/
-├── config.yaml               # 全局物理常数与系统参数配置文件（推荐在此修改材料属性）
-├── src/
+├── src/                      # 核心代码库
 │   ├── __init__.py
-│   ├── md_engine.py          # 核心 MD 引擎（包含受力、积分与运行总控逻辑）
-│   └── analysis.py           # 数据分析核心函数（RDF、Warren-Cowley、MSD计算等）
-├── tests/
-│   ├── test_task1.py         # 核心力学及基础运行逻辑验证脚本
-│   ├── test_task2.py         # NVE 能量守恒与 NVT 温度平稳验证（作图）
-│   ├── test_task3.py         # 高并发执行标准参数与浓度扫描的生产代码
-│   └── test_task4_5.py       # RDF、短程有序度及均方位移(扩散)分析测试脚本
-├── data/
-│   ├── trajectories/         # 保存的大量 .npy 模拟坐标轨迹文件
-│   ├── thermo/               # 保存的 .csv 热力学日志
-│   ├── rdf/                  # 径向分布函数计算数据存放目录
-│   └── msd/                  # 均方位移(MSD)数据存放目录
-├── figures/                  # 测试输出的验证图表存放目录 (含RDF/MSD图)
-├── report/
-│   └── results_summary.md    # 物理分析结果统计报告（有序度、扩散系数等）
-└── README.md                 # 当前使用说明文档
+│   ├── md_engine.py          # 基础动力学积分与力场引擎
+│   ├── analysis.py           # 数据分析工具集
+│   ├── phase_diagram.py      # 参数网格遍历与相图判定模块
+│   └── nnff_compare.py       # 神经网络力场推理与性能对比模块
+├── tests/                    # 测试与任务启动脚本
+│   ├── test_task1.py ... test_task9.py
+├── data/                     # 运行生成的数据缓存
+│   ├── trajectories/         # 坐标轨迹数据 (.npy)
+│   ├── thermo/               # 热力学日志 (.csv)
+│   └── phase_diagram/        # 相图记录表
+├── figures/                  # 各任务生成的可视化图表
+└── config.yaml               # 物理参数全局配置文件
 ```
 
-### 使用方法
+### 核心接口说明 (API)
 
-1.  **调整基础物理常数与物质**：
-    若需修改 Lennard-Jones 常数（如质量、$\epsilon$ 或 $\sigma$），请直接编辑项目根目录下的 `config.yaml`。引擎会在运行时自动加载最新配置并计算出折合单位的基准值。
-2.  **执行核心引擎验证**：
-    在虚拟环境下执行 Task 2 测试文件即可验证物理合理性与引擎稳定性，生成相应的图表：
+*   **`src.md_engine.run_md(config)`**:
+    系统的核心模拟入口。接收一个 `dict` 形式的 `config`，控制系统原子数、温度、时长、系综 (NVE/NVT) 等。输出包含坐标轨迹和能量历史的字典。支持 Numpy 和 PyTorch 双计算后端。
+*   **`src.analysis.compute_partial_rdf(...)`**:
+    计算双组分系统的偏径向分布函数 $g_{AA}(r), g_{BB}(r), g_{AB}(r)$。
+*   **`src.analysis.compute_warren_cowley(...)`**:
+    计算混合物的 Warren-Cowley 短程有序度参数 $\alpha_1(t)$，用于判定系统是倾向于相分离（$\alpha_1 > 0$）还是长程有序（$\alpha_1 < 0$）。
+*   **`src.analysis.compute_msd_diffusion(...)`**:
+    计算均方位移 (MSD) 并拟合自扩散系数 $D$。
+*   **`src.analysis.compute_structure_factor(...)`**:
+    通过原子坐标傅里叶变换计算系统的静态结构因子 $S(q)$。
+
+---
+
+## 使用方法
+
+1.  **参数配置**：修改根目录下的 `config.yaml` 改变全局的 Kr/Xe 分子质量、$\varepsilon$、$\sigma$ 参数。
+2.  **执行单项任务**：激活虚拟环境后，进入根目录，执行特定的任务测试文件。例如运行 Task 2 热力学验证：
     ```bash
     python tests/test_task2.py
     ```
-3.  **运行特定的生产模拟**：
-    可参考或修改 `tests/test_task3.py` 中的 `config` 字典，调用 `src.md_engine` 中的 `run_md(config)` 进行特定条件的长时间跑算：
-    ```python
-    from src.md_engine import run_md
-    
-    config = dict(
-        N_A=250, N_B=250, rho_star=0.8,
-        T_equil_K=200.0, T_prod_K=150.0,
-        dt_fs=2.0,
-        n_equil=5000, n_prod=50000, n_save=50,
-        ensemble_prod='NVT',
-        xi=1.0,
-        use_torch=False  # 生产模式推荐保持为 False 以使用 NumPy 解析求导加速计算
-    )
-    run_md(config)
-    ```
+
+---
+
+## 任务进度与输出清单
+
+### Task 1: 构建核心 MD 引擎 (✅ 已完成)
+*   **工作内容**：基于 Python 构建了 Velocity-Verlet 积分器及 Nosé-Hoover 温控。实现了 Lorentz-Berthelot 混合法则，支持 NumPy 向量化与 PyTorch 计算图两种后端。
+*   **输出结果**：可运行的基础 `run_md` 模块。
+
+### Task 2: 引擎严谨性验证 (✅ 已完成)
+*   **工作内容**：测试纯 Kr 体系在 NVE 系综下的能量守恒性质及 NVT 系综下的温度弛豫曲线。
+*   **输出结果**：`figures/task2_NVE_energy.png`, `figures/task2_NVT_energy.png`。
+
+### Task 3: 生产级模拟与基准数据获取 (✅ 已完成)
+*   **工作内容**：在不同相互作用强度（$\xi = 0.7, 1.0, 1.3$）下完成了长时生产系综计算，生成了供后续分析的轨迹序列。
+*   **输出结果**：存放在 `data/trajectories/` 中的基准轨迹数据。
+
+### Task 4: 偏径向分布函数与短程有序度 (✅ 已完成)
+*   **工作内容**：从轨迹数据中计算出了偏 $g(r)$ 和短程有序度参数 $\alpha_1$。
+*   **输出结果**：`figures/task4_rdf_comparison.png`, `figures/task4_warren_cowley_timeseries.png`。
+
+### Task 5: 均方位移与自扩散系数 (✅ 已完成)
+*   **工作内容**：分析原子轨迹，计算长时 MSD，并基于爱因斯坦关系式拟合自扩散系数。
+*   **输出结果**：`figures/task5_msd_diffusion.png`。
+
+### Task 6: 混合焓与热力学属性 (✅ 已完成)
+*   **工作内容**：计算不同组分浓度下的混合焓 $\Delta H_{\text{mix}}$。
+*   **输出结果**：`figures/task6_mixing_enthalpy.png`。
+
+### Task 7: 结构因子 (✅ 已完成)
+*   **工作内容**：将实空间坐标变换至倒空间，计算 $S(q)$ 观察晶格周期性及超晶格峰。
+*   **输出结果**：`figures/task7_structure_factor.png`。
+
+### Task 8: T-x 相图构建 (⏳ 计算中)
+*   **工作内容**：遍历 $T \in [80, 200]\text{K}$, $x_B \in [0.1, 0.9]$ 网格，长时（10万步）计算以寻找玻璃相变点及相分离边界。
+*   **运行状态**：当前测试脚本 `test_task8.py` 正在后台执行长时网格遍历任务。
+*   **预期输出**：`data/phase_diagram/phase_grid_long.csv` 以及最终的可视化相图 `figures/task8_phase_diagram_Tx.png`。
+
+### Task 9: M3GNet 神经网络力场对比 (✅ 已完成)
+*   **工作内容**：引入 `M3GNet-PES-MatPES-PBE-2025.2` 通用模型，针对经典 LJ 势进行了单点能量计算精度、二聚体曲线、ASE 分子动力学试运行的评价。并进行了计算量随原子数规模扩展的 Benchmark。
+*   **输出结果**：
+    *   二聚体曲线对比：`figures/task9_pes_dimer_comparison.png`
+    *   径向分布函数对比：`figures/task9_rdf_lj_vs_m3gnet.png`
+    *   耗时 Benchmark（测试规模延伸至 N=5000）：`figures/task9_performance_benchmark.png`

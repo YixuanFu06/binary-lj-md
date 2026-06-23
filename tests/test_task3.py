@@ -27,6 +27,7 @@ def run_standard_condition(xi):
         seed=42 + int(xi*10),
         traj_file=f'data/trajectories/traj_xi{xi:.1f}.npy',
         thermo_file=f'data/thermo/thermo_xi{xi:.1f}.csv',
+        species_file=f'data/trajectories/species_xi{xi:.1f}.npy',
         use_torch=False,
     )
     run_md(config)
@@ -48,6 +49,7 @@ def run_concentration_series(x_B):
         seed=100 + int(x_B*10),
         traj_file=f'data/trajectories/traj_xB{x_B:.1f}_xi0.7.npy',
         thermo_file=None, # Optional: could save thermo if desired, but explicitly only traj was requested
+        species_file=f'data/trajectories/species_xB{x_B:.1f}_xi0.7.npy',
         use_torch=False,
     )
     run_md(config)

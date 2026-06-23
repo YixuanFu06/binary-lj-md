@@ -47,24 +47,28 @@ def validate_energy_conservation():
     t_1fs = thermo_1fs[:, 0] * 1.0 * 1e-15 / TAU_REF
     t_2fs = thermo_2fs[:, 0] * 2.0 * 1e-15 / TAU_REF
     
-    e_1fs = thermo_1fs[:, 4] / 256
-    e_2fs = thermo_2fs[:, 4] / 256
+    ekin_2fs = thermo_2fs[:, 2] / 256
+    epot_2fs = thermo_2fs[:, 3] / 256
+    etot_2fs = thermo_2fs[:, 4] / 256
+    etot_1fs = thermo_1fs[:, 4] / 256
     
-    plt.plot(t_1fs, e_1fs - e_1fs[0], label='dt = 1 fs')
-    plt.plot(t_2fs, e_2fs - e_2fs[0], label='dt = 2 fs', alpha=0.8)
+    plt.plot(t_2fs, ekin_2fs, label='Kinetic Energy (dt=2fs)', color='red', alpha=0.7)
+    plt.plot(t_2fs, epot_2fs, label='Potential Energy (dt=2fs)', color='blue', alpha=0.7)
+    plt.plot(t_2fs, etot_2fs, label='Total Energy (dt=2fs)', color='black', linewidth=2)
+    plt.plot(t_1fs, etot_1fs, label='Total Energy (dt=1fs)', color='green', linestyle='--', linewidth=2)
     
     plt.xlabel(r'Time ($\tau^*$)')
-    plt.ylabel(r'$\Delta E_{tot}/N$ ($\epsilon^*$)')
+    plt.ylabel(r'Energy per atom ($\epsilon^*$)')
     plt.title('Energy Conservation in NVE Ensemble')
     plt.legend()
     plt.grid(True)
     plt.tight_layout()
-    plt.savefig('figures/validation_energy_conservation.png')
+    plt.savefig('figures/task2_NVE_energy.png')
     plt.close()
     
     # Calculate drift per tau*
-    drift_1fs = abs(e_1fs[-1] - e_1fs[0]) / (t_1fs[-1] - t_1fs[0])
-    drift_2fs = abs(e_2fs[-1] - e_2fs[0]) / (t_2fs[-1] - t_2fs[0])
+    drift_1fs = abs(etot_1fs[-1] - etot_1fs[0]) / (t_1fs[-1] - t_1fs[0])
+    drift_2fs = abs(etot_2fs[-1] - etot_2fs[0]) / (t_2fs[-1] - t_2fs[0])
     
     print(f"Drift dt=1fs: {drift_1fs:.6e} ε*/(atom·τ*)")
     print(f"Drift dt=2fs: {drift_2fs:.6e} ε*/(atom·τ*)")
@@ -105,7 +109,7 @@ def validate_temperature_equilibration():
     plt.legend()
     plt.grid(True)
     plt.tight_layout()
-    plt.savefig('figures/validation_temperature.png')
+    plt.savefig('figures/task2_NVT_energy.png')
     plt.close()
     
     # Calculate average temperature after equilibration (last 50% of the run)
