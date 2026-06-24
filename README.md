@@ -97,10 +97,9 @@ binary-lj-md/
 *   **工作内容**：将实空间坐标变换至倒空间，计算 $S(q)$ 观察晶格周期性及超晶格峰。
 *   **输出结果**：`figures/task7_structure_factor.png`。
 
-### Task 8: T-x 相图构建 (⏳ 计算中)
-*   **工作内容**：遍历 $T \in [80, 200]\text{K}$, $x_B \in [0.1, 0.9]$ 网格，长时（10万步）计算以寻找玻璃相变点及相分离边界。
-*   **运行状态**：当前测试脚本 `test_task8.py` 正在后台执行长时网格遍历任务。
-*   **预期输出**：`data/phase_diagram/phase_grid_long.csv` 以及最终的可视化相图 `figures/task8_phase_diagram_Tx.png`。
+### Task 8: T-x 相图构建 (✅ 已完成)
+*   **工作内容**：遍历 $T \in [80, 200]\text{K}$, $x_B \in [0.1, 0.9]$ 网格，执行长时（最高10万步）的动力学演化。计算提取短程有序度等指标，绘制了二元合金系统的非晶相变与相分离边界。
+*   **输出结果**：`data/phase_diagram/phase_grid_long.csv` 及可视化相图 `figures/task8_phase_diagram_Tx.png`。
 
 ### Task 9: M3GNet 神经网络力场对比 (✅ 已完成)
 *   **工作内容**：引入 `M3GNet-PES-MatPES-PBE-2025.2` 通用模型，针对经典 LJ 势进行了单点能量计算精度、二聚体曲线、ASE 分子动力学试运行的评价。并进行了计算量随原子数规模扩展的 Benchmark。
