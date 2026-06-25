@@ -57,9 +57,7 @@ def main():
     plt.annotate('Low-q peak\n(Phase Separation)', xy=(1.0, 2.5), xytext=(2.0, 3.5),
                  arrowprops=dict(facecolor='red', shrink=0.05), color='red', fontsize=12)
                  
-    # Usually ordering superlattice peaks appear around q ~ 2*pi / (L_ordering)
-    plt.annotate('Superlattice peak\n(Ordering)', xy=(5.0, 1.5), xytext=(5.5, 2.5),
-                 arrowprops=dict(facecolor='blue', shrink=0.05), color='blue', fontsize=12)
+
                  
     plt.xlim(0, 15.0)
     plt.legend(fontsize=12)
